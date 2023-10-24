@@ -3,10 +3,19 @@ function main() {
   var idoc = app.activeDocument;
   var sel = idoc.selection[0];
 
+  // If nothing is selected, abort mission!!
   if (sel == null) {
     alert("Nothing selected.");
     return;
   }
+
+  // If items aren't a group, group them together
+  if(sel.typename != "GroupItem") {
+    app.executeMenuCommand("ungroup");
+    app.executeMenuCommand("group");
+  }
+
+  sel = idoc.selection[0];
 
   // Disable alerts
   app.userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
@@ -28,8 +37,6 @@ function main() {
   cutContourColor.yellow = 0;
   cutContourColor.black = 0;
 
-
-
   // Offset current selection
   offsetPath(idoc, sel, offset * 0.5);
   // Select again after offseting
@@ -37,9 +44,7 @@ function main() {
   // Move to layer Outline
   moveToLayer(idoc, sel, "CUT_CONTOUR");
   // Set fill color
-  setGroupStrokeColor(sel, cutContourColor);
-
-
+  setGroupColor(sel, cutContourColor, false);
 
   // Offset current selection
   offsetPath(idoc, sel, offset * 0.5);
@@ -48,11 +53,12 @@ function main() {
   // Move to layer Outline
   moveToLayer(idoc, sel, "Outline");
   // Set fill color
-  setGroupFillColor(sel, outlineColor);
+  setGroupColor(sel, outlineColor, true);
 
   // Redraw
   app.redraw();
 
+  // Enable alerts
   app.userInteractionLevel = UserInteractionLevel.DISPLAYALERTS;
 }
 
@@ -88,24 +94,22 @@ function moveToLayer(idoc, item, layerName) {
   item.move(_layer, ElementPlacement.PLACEATEND);
 }
 
-function setGroupFillColor(group, newColor) {
+function setGroupColor(group, newColor, isFill) {
   // Get all the new elements in the group in the Outline layer
   for (var i = 0; i < group.pathItems.length; i++) {
     var element = group.pathItems[i];
-    element.filled = true;
-    element.stroked = false;
-    element.fillColor = newColor;
-  }
-}
 
-function setGroupStrokeColor(group, newColor) {
-    // Get all the new elements in the group in the Outline layer
-    for (var i = 0; i < group.pathItems.length; i++) {
-      var element = group.pathItems[i];
+    if (isFill) {
+      element.filled = true;
+      element.stroked = false;
+      element.fillColor = newColor;
+    } else {
       element.stroked = true;
       element.filled = false;
       element.strokeColor = newColor;
+      element.strokeWidth = 0.25;
     }
   }
+}
 
 main();
