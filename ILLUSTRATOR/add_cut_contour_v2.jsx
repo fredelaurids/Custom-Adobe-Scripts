@@ -3,7 +3,7 @@
 // I use this to create stickers with a bleed, as the outline is offset double the amount of the cut contour.
 
 function main() {
-    /* --- INITIALIZATION --- */
+  /* --- INITIALIZATION --- */
   var doc = app.activeDocument;
   var sel = doc.selection;
 
@@ -52,6 +52,21 @@ function main() {
     itemArray[i].duplicate(cutContourLayer, ElementPlacement.PLACEATEND);
     itemArray[i].duplicate(outlineLayer, ElementPlacement.PLACEATEND);
   }
+  // Crop any compoundPaths in the array
+  doc.selection = null;
+  for (var i = 0; i < cutContourLayer.pluginItems.length; i++) {
+    cutContourLayer.pluginItems[i].selected = true;
+  }
+  for (var i = 0; i < cutContourLayer.compoundPathItems.length; i++) {
+    cutContourLayer.compoundPathItems[i].selected = true;
+  }
+  app.executeMenuCommand("Live Pathfinder Crop");
+  app.executeMenuCommand("expandStyle");
+  app.executeMenuCommand("ungroup");
+  app.executeMenuCommand("ungroup");
+  app.executeMenuCommand("ungroup");
+  app.executeMenuCommand("ungroup");
+  app.executeMenuCommand("ungroup");
 
   /* --- OFFSET, MERGE AND STYLE CUT CONTOUR LAYER --- */
   // Offset Path effect string for Cut Contour layer.
@@ -116,10 +131,24 @@ function collectPathItems(item, itemArray) {
       // Push each pathItem to array
       itemArray.push(item.pathItems[i]);
     }
+    for (var i = 0; i < item.compoundPathItems.length; i++) {
+      // Push each pathItem to array
+      itemArray.push(item.compoundPathItems[i]);
+    }
+    for (var i = 0; i < item.pluginItems.length; i++) {
+      // Push each pathItem to array
+      itemArray.push(item.pluginItems[i]);
+    }
     for (var i = 0; i < item.groupItems.length; i++) {
       // For each nested GroupItem inside GroupItem, run collectPathItems recursively
       collectPathItems(item.groupItems[i], itemArray);
     }
+  } else if (
+    item.typename == "PathItem" ||
+    item.typename == "CompoundPathItem" ||
+    item.typename == "PluginItem"
+  ) {
+    itemArray.push(item);
   }
 }
 
