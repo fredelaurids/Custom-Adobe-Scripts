@@ -143,26 +143,25 @@ function findOrCreateLayer(layerName) {
 }
 
 function findOrCreateColor(colorName) {
-  try {
-    var newSpot = app.activeDocument.swatches.getByName("CutContour");
-  } catch (e) {
-    var newColor = new CMYKColor();
-    newColor.cyan = 0;
-    newColor.magenta = 100;
-    newColor.yellow = 0;
-    newColor.black = 0;
-    
-    var newSpot = app.activeDocument.spots.add();
-    newSpot.name = "CutContour";
-    newSpot.colorType = ColorModel.SPOT;
-    newSpot.color = newColor;
+  var newSpotColor = app.activeDocument.swatches.getByName(colorName);
+  newSpotColor.remove();
 
-    var newSpotColor = new SpotColor();
-    newSpotColor = newSpot;
-    newSpotColor.tint = 100;
-  } finally {
-    return newSpot.color;
-  }
+  var newColor = new CMYKColor();
+  newColor.cyan = 0;
+  newColor.magenta = 100;
+  newColor.yellow = 0;
+  newColor.black = 0;
+
+  var newSpot = app.activeDocument.spots.add();
+  newSpot.name = colorName;
+  newSpot.colorType = ColorModel.SPOT;
+  newSpot.color = newColor;
+
+  newSpotColor = new SpotColor();
+  newSpotColor.spot = newSpot;
+  newSpotColor.tint = 100;
+
+  return newSpotColor;
 }
 
 function cropClippedGroups(layer) {
