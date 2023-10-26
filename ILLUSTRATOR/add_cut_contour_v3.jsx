@@ -29,14 +29,17 @@ function main() {
   OUTLINE_COLOR.yellow = 0;
   OUTLINE_COLOR.black = 100;
   // Cut contour stroke color
-  var CUT_CONTOUR_COLOR = new CMYKColor();
-  CUT_CONTOUR_COLOR.cyan = 0;
-  CUT_CONTOUR_COLOR.magenta = 100;
-  CUT_CONTOUR_COLOR.yellow = 0;
-  CUT_CONTOUR_COLOR.black = 0;
+  // var CUT_CONTOUR_COLOR = new CMYKColor();
+  // CUT_CONTOUR_COLOR.cyan = 0;
+  // CUT_CONTOUR_COLOR.magenta = 100;
+  // CUT_CONTOUR_COLOR.yellow = 0;
+  // CUT_CONTOUR_COLOR.black = 0;
+
+  var CUT_CONTOUR_COLOR = findOrCreateColor("CutContour");
+
   // Layer names
-  var CUT_CONTOUR_NAME = prompt("Cut contour layer name", "CUT_CONTOUR");
-  var OUTLINE_NAME = prompt("Outline layer name", "OUTLINE");
+  var CUT_CONTOUR_NAME = prompt("Cut contour layer name", "CutContour");
+  var OUTLINE_NAME = prompt("Outline layer name", "Outline");
 
   // Create new layers
   var cutContourLayer = findOrCreateLayer(CUT_CONTOUR_NAME);
@@ -56,19 +59,38 @@ function main() {
   offsetAndMerge(cutContourLayer, OFFSET_VALUE);
   offsetAndMerge(outlineLayer, OFFSET_VALUE * 2);
 
+  // Set color of cut contour layer
+  doc.selection = null;
+  cutContourLayer.hasSelectedArtwork = true;
   // Set cut contour stroke and fill
-  for (var i = 0; i < cutContourLayer.pathItems.length; i++) {
-    cutContourLayer.pathItems[i].filled = false;
-    cutContourLayer.pathItems[i].stroked = true;
-    cutContourLayer.pathItems[i].strokeWidth = 0.25;
-    cutContourLayer.pathItems[i].strokeColor = CUT_CONTOUR_COLOR;
+  for (var i = 0; i < doc.selection.length; i++) {
+    if (doc.selection[i].typename == "PathItem") {
+      doc.selection[i].filled = false;
+      doc.selection[i].stroked = true;
+      doc.selection[i].strokeWidth = 0.25;
+      doc.selection[i].strokeColor = CUT_CONTOUR_COLOR;
+    } else {
+      doc.selection[i].pathItems[0].filled = false;
+      doc.selection[i].pathItems[0].stroked = true;
+      doc.selection[i].pathItems[0].strokeWidth = 0.25;
+      doc.selection[i].pathItems[0].strokeColor = CUT_CONTOUR_COLOR;
+    }
   }
 
-  // Set outline stroke and fill
-  for (var i = 0; i < outlineLayer.pathItems.length; i++) {
-    outlineLayer.pathItems[i].filled = true;
-    outlineLayer.pathItems[i].stroked = false;
-    outlineLayer.pathItems[i].fillColor = OUTLINE_COLOR;
+  // Set color of outline layer
+  doc.selection = null;
+  outlineLayer.hasSelectedArtwork = true;
+  // Set cut contour stroke and fill
+  for (var i = 0; i < doc.selection.length; i++) {
+    if (doc.selection[i].typename == "PathItem") {
+      doc.selection[i].filled = true;
+      doc.selection[i].stroked = false;
+      doc.selection[i].fillColor = OUTLINE_COLOR;
+    } else {
+      doc.selection[i].pathItems[0].filled = true;
+      doc.selection[i].pathItems[0].stroked = false;
+      doc.selection[i].pathItems[0].fillColor = OUTLINE_COLOR;
+    }
   }
 
   // Move the outline layer below everything
@@ -120,6 +142,29 @@ function findOrCreateLayer(layerName) {
   }
 }
 
+function findOrCreateColor(colorName) {
+  try {
+    var newSpot = app.activeDocument.swatches.getByName("CutContour");
+  } catch (e) {
+    var newColor = new CMYKColor();
+    newColor.cyan = 0;
+    newColor.magenta = 100;
+    newColor.yellow = 0;
+    newColor.black = 0;
+    
+    var newSpot = app.activeDocument.spots.add();
+    newSpot.name = "CutContour";
+    newSpot.colorType = ColorModel.SPOT;
+    newSpot.color = newColor;
+
+    var newSpotColor = new SpotColor();
+    newSpotColor = newSpot;
+    newSpotColor.tint = 100;
+  } finally {
+    return newSpot.color;
+  }
+}
+
 function cropClippedGroups(layer) {
   app.activeDocument.selection = null;
 
@@ -148,7 +193,7 @@ function collectClippedGroups(item, itemArray) {
       // For each nested GroupItem inside GroupItem, run collectPathItems recursively
       collectClippedGroups(item.groupItems[i], itemArray);
     }
-    if(item.clipped) {
+    if (item.clipped) {
       itemArray.push(item);
     }
   }
