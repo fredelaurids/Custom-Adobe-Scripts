@@ -143,25 +143,29 @@ function findOrCreateLayer(layerName) {
 }
 
 function findOrCreateColor(colorName) {
-  var newSpotColor = app.activeDocument.swatches.getByName(colorName);
-  newSpotColor.remove();
+  try {
+    var newSpotColor = app.activeDocument.swatches.getByName(colorName);
+    newSpotColor.remove();
+  } catch(err) {
+    // whatever
+  } finally {
+    var newColor = new CMYKColor();
+    newColor.cyan = 0;
+    newColor.magenta = 100;
+    newColor.yellow = 0;
+    newColor.black = 0;
+  
+    var newSpot = app.activeDocument.spots.add();
+    newSpot.name = colorName;
+    newSpot.colorType = ColorModel.SPOT;
+    newSpot.color = newColor;
+  
+    newSpotColor = new SpotColor();
+    newSpotColor.spot = newSpot;
+    newSpotColor.tint = 100;
 
-  var newColor = new CMYKColor();
-  newColor.cyan = 0;
-  newColor.magenta = 100;
-  newColor.yellow = 0;
-  newColor.black = 0;
-
-  var newSpot = app.activeDocument.spots.add();
-  newSpot.name = colorName;
-  newSpot.colorType = ColorModel.SPOT;
-  newSpot.color = newColor;
-
-  newSpotColor = new SpotColor();
-  newSpotColor.spot = newSpot;
-  newSpotColor.tint = 100;
-
-  return newSpotColor;
+    return newSpotColor;
+  }
 }
 
 function cropClippedGroups(layer) {
