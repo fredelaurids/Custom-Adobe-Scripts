@@ -1,11 +1,10 @@
-// app.doScript(
-// 	main,
-// 	ScriptLanguage.JAVASCRIPT,
-// 	undefined,
-// 	UndoModes.entireScript,
-// 	"Create Modular Grid"
-// );
-main();
+app.doScript(
+	main,
+	ScriptLanguage.JAVASCRIPT,
+	undefined,
+	UndoModes.entireScript,
+	"Create Modular Grid"
+);
 
 function main() {
 	if (app.activeDocument.layoutWindows.length > 0) {
@@ -157,6 +156,9 @@ function openDialog() {
 			}
 			with (dialogRows.add()) {
 				with (borderPanels.add()) {
+                    staticTexts.add({
+                        staticLabel: "Guide color:",
+                    });
 					var colorMenu = dropdowns.add({
 						stringList: colorStrings,
 						selectedIndex: 0,
@@ -166,6 +168,9 @@ function openDialog() {
 			}
 			with (dialogRows.add()) {
 				with (borderPanels.add()) {
+                    staticTexts.add({
+                        staticLabel: "Base on paragraph style:",
+                    });
 					var paragraphStyleMenu = dropdowns.add({
 						stringList: paragraphStyleStrings,
 						selectedIndex: 0,
