@@ -1,12 +1,15 @@
-// app.doScript(
-// 	main,
-// 	ScriptLanguage.JAVASCRIPT,
-// 	undefined,
-// 	UndoModes.entireScript,
-// 	"Create Modular Grid"
-// );
+/* 
+Frede L. Knudsen - 2024.
+Drawing guides function taken from https://github.com/jpobojewski/InDesign-Toolbox/blob/master/Create%20Guides%20Around%20Container.jsx
+*/
 
-main();
+app.doScript(
+	main,
+	ScriptLanguage.JAVASCRIPT,
+	undefined,
+	UndoModes.entireScript,
+	"Create Modular Grid"
+);
 
 function main() {
 	if (app.activeDocument.layoutWindows.length > 0) {
